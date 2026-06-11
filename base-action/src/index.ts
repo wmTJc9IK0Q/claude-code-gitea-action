@@ -18,15 +18,9 @@ async function run() {
     });
 
     await runClaude(promptConfig.path, {
-      allowedTools: process.env.INPUT_ALLOWED_TOOLS,
-      disallowedTools: process.env.INPUT_DISALLOWED_TOOLS,
-      maxTurns: process.env.INPUT_MAX_TURNS,
-      mcpConfig: process.env.INPUT_MCP_CONFIG,
-      systemPrompt: process.env.INPUT_SYSTEM_PROMPT,
-      appendSystemPrompt: process.env.INPUT_APPEND_SYSTEM_PROMPT,
-      claudeEnv: process.env.INPUT_CLAUDE_ENV,
-      fallbackModel: process.env.INPUT_FALLBACK_MODEL,
-      model: process.env.ANTHROPIC_MODEL,
+      claudeArgs: process.env.INPUT_CLAUDE_ARGS,
+      pathToClaudeCodeExecutable:
+        process.env.INPUT_PATH_TO_CLAUDE_CODE_EXECUTABLE,
     });
   } catch (error) {
     core.setFailed(`Action failed with error: ${error}`);

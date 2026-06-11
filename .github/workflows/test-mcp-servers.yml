@@ -28,7 +28,6 @@ jobs:
         id: claude-test
         with:
           prompt: "Call the test_tool tool and report its response."
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: --allowedTools mcp__test-server__test_tool
         env:
@@ -119,7 +118,6 @@ jobs:
         id: claude-config-test
         with:
           prompt: "Call the test_tool tool and report its response."
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: |
             --allowedTools mcp__test-server__test_tool

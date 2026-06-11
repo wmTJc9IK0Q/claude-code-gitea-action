@@ -12,16 +12,8 @@ const EXECUTION_FILE = `${process.env.RUNNER_TEMP}/claude-execution-output.json`
 const BASE_ARGS = ["-p", "--verbose", "--output-format", "stream-json"];
 
 export type ClaudeOptions = {
-  allowedTools?: string;
-  disallowedTools?: string;
-  maxTurns?: string;
-  mcpConfig?: string;
-  systemPrompt?: string;
-  appendSystemPrompt?: string;
-  claudeEnv?: string;
-  fallbackModel?: string;
-  timeoutMinutes?: string;
-  model?: string;
+  claudeArgs?: string;
+  pathToClaudeCodeExecutable?: string;
 };
 
 type PreparedConfig = {
