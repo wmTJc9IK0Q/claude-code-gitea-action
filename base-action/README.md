@@ -61,8 +61,8 @@ Add the following to your workflow file:
   with:
     prompt: "Review and fix TypeScript errors"
     claude_args: |
-      --model claude-opus-4-1-20250805
-      --fallback-model claude-sonnet-4-20250514
+      --model claude-opus-4-8
+      --fallback-model claude-sonnet-4-6
       --allowedTools "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
@@ -174,7 +174,7 @@ Provide the settings configuration directly as a JSON string:
     prompt: "Your prompt here"
     settings: |
       {
-        "model": "claude-opus-4-20250514",
+        "model": "claude-opus-4-8",
         "env": {
           "DEBUG": "true",
           "API_URL": "https://api.example.com"
@@ -356,7 +356,7 @@ Use provider-specific model names via `--model` in `claude_args` based on your c
   uses: anthropics/claude-code-base-action@beta
   with:
     prompt: "Your prompt here"
-    claude_args: --model claude-3-7-sonnet-20250219
+    claude_args: --model claude-sonnet-4-6
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
 # For Amazon Bedrock (requires OIDC authentication)
@@ -370,7 +370,7 @@ Use provider-specific model names via `--model` in `claude_args` based on your c
   uses: anthropics/claude-code-base-action@beta
   with:
     prompt: "Your prompt here"
-    claude_args: --model anthropic.claude-3-7-sonnet-20250219-v1:0
+    claude_args: --model anthropic.claude-sonnet-4-5-20250929-v1:0
     use_bedrock: "true"
 
 # For Google Vertex AI (requires OIDC authentication)
@@ -384,7 +384,7 @@ Use provider-specific model names via `--model` in `claude_args` based on your c
   uses: anthropics/claude-code-base-action@beta
   with:
     prompt: "Your prompt here"
-    claude_args: --model claude-3-7-sonnet@20250219
+    claude_args: --model claude-sonnet-4-5@20250929
     use_vertex: "true"
 ```
 
@@ -405,7 +405,7 @@ This example shows how to use OIDC authentication with AWS Bedrock:
     prompt: "Your prompt here"
     use_bedrock: "true"
     claude_args: |
-      --model anthropic.claude-3-7-sonnet-20250219-v1:0
+      --model anthropic.claude-sonnet-4-5-20250929-v1:0
       --allowedTools "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
 ```
 
@@ -426,7 +426,7 @@ This example shows how to use OIDC authentication with GCP Vertex AI:
     prompt: "Your prompt here"
     use_vertex: "true"
     claude_args: |
-      --model claude-3-7-sonnet@20250219
+      --model claude-sonnet-4-5@20250929
       --allowedTools "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
 ```
 
