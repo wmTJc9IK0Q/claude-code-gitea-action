@@ -37,6 +37,10 @@ inputs:
     description: "Instructions for Claude. Can be a direct prompt or custom template."
     required: false
     default: ""
+  direct_prompt:
+    description: "Deprecated alias for prompt. Use prompt instead."
+    required: false
+    default: ""
   settings:
     description: "Claude Code settings as JSON string or path to settings JSON file"
     required: false
@@ -145,6 +149,7 @@ runs:
       env:
         MODE: ${{ inputs.mode }}
         PROMPT: ${{ inputs.prompt }}
+        DIRECT_PROMPT: ${{ inputs.direct_prompt }}
         TRIGGER_PHRASE: ${{ inputs.trigger_phrase }}
         ASSIGNEE_TRIGGER: ${{ inputs.assignee_trigger }}
         LABEL_TRIGGER: ${{ inputs.label_trigger }}
@@ -288,7 +293,7 @@ runs:
         fi
 
     - name: Revoke app token
-      if: always() && inputs.github_token == '' && steps.prepare.outputs.skipped_due_to_workflow_validation_mismatch != 'true'
+      if: always() && inputs.github_token == '' && steps.prepare.outputs.GITHUB_TOKEN != '' && steps.prepare.outputs.skipped_due_to_workflow_validation_mismatch != 'true'
       shell: bash
       run: |
         curl -L \

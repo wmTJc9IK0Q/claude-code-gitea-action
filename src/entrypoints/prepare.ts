@@ -24,6 +24,23 @@ async function run() {
     // Auto-detect mode based on context
     const mode = getMode(context);
 
+    // Check trigger conditions before token setup so skipped events do not need
+    // OIDC or GitHub App authentication.
+    const containsTrigger = mode.shouldTrigger(context);
+
+    // Debug logging
+    console.log(`Mode: ${mode.name}`);
+    console.log(`Context prompt: ${context.inputs?.prompt || "NO PROMPT"}`);
+    console.log(`Trigger result: ${containsTrigger}`);
+
+    // Set output for action.yml to check
+    core.setOutput("contains_trigger", containsTrigger.toString());
+
+    if (!containsTrigger) {
+      console.log("No trigger found, skipping remaining steps");
+      return;
+    }
+
     // Setup GitHub token
     const githubToken = await setupGitHubToken();
     const octokit = createOctokit(githubToken);
@@ -43,24 +60,6 @@ async function run() {
           "Actor does not have write permissions to the repository",
         );
       }
-    }
-
-    // Check trigger conditions
-    const containsTrigger = mode.shouldTrigger(context);
-
-    // Debug logging
-    console.log(`Mode: ${mode.name}`);
-    console.log(`Context prompt: ${context.inputs?.prompt || "NO PROMPT"}`);
-    console.log(`Trigger result: ${containsTrigger}`);
-
-    // Set output for action.yml to check
-    core.setOutput("contains_trigger", containsTrigger.toString());
-
-    if (!containsTrigger) {
-      console.log("No trigger found, skipping remaining steps");
-      // Still set github_token output even when skipping
-      core.setOutput("github_token", githubToken);
-      return;
     }
 
     // Step 5: Use the new modular prepare function

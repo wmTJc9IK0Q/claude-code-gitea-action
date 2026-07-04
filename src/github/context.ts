@@ -137,7 +137,7 @@ export function parseGitHubContext(): GitHubContext {
     },
     actor: context.actor,
     inputs: {
-      prompt: process.env.PROMPT || "",
+      prompt: process.env.PROMPT || process.env.DIRECT_PROMPT || "",
       triggerPhrase: process.env.TRIGGER_PHRASE ?? "@claude",
       assigneeTrigger: process.env.ASSIGNEE_TRIGGER ?? "",
       labelTrigger: process.env.LABEL_TRIGGER ?? "",
