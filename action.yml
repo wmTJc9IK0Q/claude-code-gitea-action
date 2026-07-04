@@ -156,6 +156,8 @@ runs:
         bun run ${{ github.action_path }}/src/entrypoints/prepare.ts
       env:
         MODE: ${{ inputs.mode }}
+        PROMPT: ${{ inputs.prompt }}
+        DIRECT_PROMPT: ${{ inputs.direct_prompt }}
         TRIGGER_PHRASE: ${{ inputs.trigger_phrase }}
         ASSIGNEE_TRIGGER: ${{ inputs.assignee_trigger }}
         LABEL_TRIGGER: ${{ inputs.label_trigger }}
@@ -164,7 +166,6 @@ runs:
         ALLOWED_TOOLS: ${{ inputs.allowed_tools }}
         DISALLOWED_TOOLS: ${{ inputs.disallowed_tools }}
         CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
-        DIRECT_PROMPT: ${{ inputs.direct_prompt }}
         OVERRIDE_PROMPT: ${{ inputs.override_prompt }}
         ADDITIONAL_PERMISSIONS: ${{ inputs.additional_permissions }}
         OVERRIDE_GITHUB_TOKEN: ${{ inputs.gitea_token }}
@@ -292,3 +293,4 @@ runs:
         else
           echo "⚠️ Claude Code execution completed but no report file was generated" >> $GITHUB_STEP_SUMMARY
         fi
+

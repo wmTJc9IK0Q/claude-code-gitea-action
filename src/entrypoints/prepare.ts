@@ -7,7 +7,6 @@
 
 import * as core from "@actions/core";
 import { setupGitHubToken } from "../github/token";
-import { checkTriggerAction } from "../github/validation/trigger";
 import { checkHumanActor } from "../github/validation/actor";
 import { checkWritePermissions } from "../github/validation/permissions";
 import { createInitialComment } from "../github/operations/comments/create-initial";
@@ -22,12 +21,30 @@ import { getMode } from "../modes/registry";
 
 async function run() {
   try {
-    // Step 1: Setup GitHub token
+    // Step 1: Parse GitHub context (once for all operations)
+    const context = parseGitHubContext();
+
+    // Auto-detect mode based on context
+    const mode = getMode(context.inputs.mode);
+
+    // Check trigger conditions before token setup so skipped events do not need
+    // OIDC or GitHub App authentication.
+    const containsTrigger = mode.shouldTrigger(context);
+
+    console.log(`Mode: ${mode.name}`);
+    console.log(`Context prompt: ${context.inputs?.prompt || "NO PROMPT"}`);
+    console.log(`Trigger result: ${containsTrigger}`);
+
+    core.setOutput("contains_trigger", containsTrigger.toString());
+
+    if (!containsTrigger) {
+      console.log("No trigger found, skipping remaining steps");
+      return;
+    }
+
+    // Step 2: Setup GitHub token (only now that we know we need it)
     const githubToken = await setupGitHubToken();
     const client = createClient(githubToken);
-
-    // Step 2: Parse GitHub context (once for all operations)
-    const context = parseGitHubContext();
 
     // Step 3: Check write permissions
     const hasWritePermissions = await checkWritePermissions(
@@ -40,31 +57,19 @@ async function run() {
       );
     }
 
-    // Step 4: Check trigger conditions
-    const containsTrigger = await checkTriggerAction(context);
-
-    // Set outputs that are always needed
-    core.setOutput("contains_trigger", containsTrigger.toString());
     core.setOutput("GITHUB_TOKEN", githubToken);
 
-    if (!containsTrigger) {
-      console.log("No trigger found, skipping remaining steps");
-      return;
-    }
-
-    // Step 5: Check if actor is human
+    // Step 4: Check if actor is human
     await checkHumanActor(client.api, context);
 
-    const mode = getMode(context.inputs.mode);
-
-    // Step 6: Create initial tracking comment (if required by mode)
+    // Step 5: Create initial tracking comment (if required by mode)
     let commentId: number | undefined;
     if (mode.shouldCreateTrackingComment()) {
       commentId = await createInitialComment(client.api, context);
       core.setOutput("claude_comment_id", commentId!.toString());
     }
 
-    // Step 7: Fetch GitHub data (once for both branch setup and prompt creation)
+    // Step 6: Fetch GitHub data (once for both branch setup and prompt creation)
     const githubData = await fetchGitHubData({
       client: client,
       repository: `${context.repository.owner}/${context.repository.repo}`,
