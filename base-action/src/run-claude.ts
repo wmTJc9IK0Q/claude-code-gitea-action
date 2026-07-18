@@ -22,6 +22,35 @@ type PreparedConfig = {
   env: Record<string, string>;
 };
 
+function parseClaudeArgs(argsStr?: string): string[] {
+  if (!argsStr || argsStr.trim() === "") return [];
+  const args: string[] = [];
+  let current = "";
+  let inQuote = false;
+  let quoteChar = "";
+  for (const char of argsStr) {
+    if (inQuote) {
+      if (char === quoteChar) {
+        inQuote = false;
+      } else {
+        current += char;
+      }
+    } else if (char === "'" || char === '"') {
+      inQuote = true;
+      quoteChar = char;
+    } else if (char === " ") {
+      if (current) {
+        args.push(current);
+        current = "";
+      }
+    } else {
+      current += char;
+    }
+  }
+  if (current) args.push(current);
+  return args;
+}
+
 function parseCustomEnvVars(claudeEnv?: string): Record<string, string> {
   if (!claudeEnv || claudeEnv.trim() === "") {
     return {};
@@ -29,18 +58,17 @@ function parseCustomEnvVars(claudeEnv?: string): Record<string, string> {
 
   const customEnv: Record<string, string> = {};
 
-  // Split by lines and parse each line as KEY: VALUE
   const lines = claudeEnv.split("\n");
 
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (trimmedLine === "" || trimmedLine.startsWith("#")) {
-      continue; // Skip empty lines and comments
+      continue;
     }
 
     const colonIndex = trimmedLine.indexOf(":");
     if (colonIndex === -1) {
-      continue; // Skip lines without colons
+      continue;
     }
 
     const key = trimmedLine.substring(0, colonIndex).trim();
@@ -58,54 +86,12 @@ export function prepareRunConfig(
   promptPath: string,
   options: ClaudeOptions,
 ): PreparedConfig {
-  const claudeArgs = [...BASE_ARGS];
-
-  if (options.allowedTools) {
-    claudeArgs.push("--allowedTools", options.allowedTools);
-  }
-  if (options.disallowedTools) {
-    claudeArgs.push("--disallowedTools", options.disallowedTools);
-  }
-  if (options.maxTurns) {
-    const maxTurnsNum = parseInt(options.maxTurns, 10);
-    if (isNaN(maxTurnsNum) || maxTurnsNum <= 0) {
-      throw new Error(
-        `maxTurns must be a positive number, got: ${options.maxTurns}`,
-      );
-    }
-    claudeArgs.push("--max-turns", options.maxTurns);
-  }
-  if (options.mcpConfig) {
-    claudeArgs.push("--mcp-config", options.mcpConfig);
-  }
-  if (options.systemPrompt) {
-    claudeArgs.push("--system-prompt", options.systemPrompt);
-  }
-  if (options.appendSystemPrompt) {
-    claudeArgs.push("--append-system-prompt", options.appendSystemPrompt);
-  }
-  if (options.fallbackModel) {
-    claudeArgs.push("--fallback-model", options.fallbackModel);
-  }
-  if (options.model) {
-    claudeArgs.push("--model", options.model);
-  }
-  if (options.timeoutMinutes) {
-    const timeoutMinutesNum = parseInt(options.timeoutMinutes, 10);
-    if (isNaN(timeoutMinutesNum) || timeoutMinutesNum <= 0) {
-      throw new Error(
-        `timeoutMinutes must be a positive number, got: ${options.timeoutMinutes}`,
-      );
-    }
-  }
-
-  // Parse custom environment variables
-  const customEnv = parseCustomEnvVars(options.claudeEnv);
+  const claudeArgs = [...BASE_ARGS, ...parseClaudeArgs(options.claudeArgs)];
 
   return {
     claudeArgs,
     promptPath,
-    env: customEnv,
+    env: {},
   };
 }
 
@@ -215,9 +201,7 @@ export async function runClaude(promptPath: string, options: ClaudeOptions) {
 
   // Wait for Claude to finish with timeout
   let timeoutMs = 10 * 60 * 1000; // Default 10 minutes
-  if (options.timeoutMinutes) {
-    timeoutMs = parseInt(options.timeoutMinutes, 10) * 60 * 1000;
-  } else if (process.env.INPUT_TIMEOUT_MINUTES) {
+  if (process.env.INPUT_TIMEOUT_MINUTES) {
     const envTimeout = parseInt(process.env.INPUT_TIMEOUT_MINUTES, 10);
     if (isNaN(envTimeout) || envTimeout <= 0) {
       throw new Error(
