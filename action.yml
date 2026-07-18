@@ -93,6 +93,10 @@ inputs:
   gitea_token:
     description: "Gitea token with repo and pull request permissions (defaults to GITHUB_TOKEN)"
     required: false
+  claude_args:
+    description: "Additional arguments to pass directly to Claude CLI (e.g., --max-turns 10 --model claude-opus-4-8)"
+    required: false
+    default: ""
   path_to_claude_code_executable:
     description: "Path to a custom Claude Code executable to use instead of installing"
     required: false
@@ -194,9 +198,10 @@ runs:
     - name: Run Claude Code
       id: claude-code
       if: steps.prepare.outputs.contains_trigger == 'true'
-      uses: anthropics/claude-code-base-action@v0.0.63
+      uses: ./base-action
       with:
         prompt_file: ${{ runner.temp }}/claude-prompts/claude-prompt.txt
+        claude_args: ${{ inputs.claude_args }}
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
         disallowed_tools: ${{ env.DISALLOWED_TOOLS }}
         max_turns: ${{ inputs.max_turns }}

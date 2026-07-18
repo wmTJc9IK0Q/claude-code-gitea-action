@@ -14,6 +14,10 @@ inputs:
     description: "Path to a file containing the prompt to send to Claude Code (mutually exclusive with prompt)"
     required: false
     default: ""
+  claude_args:
+    description: "Additional arguments passed directly to the Claude CLI (e.g., --max-turns 3 --mcp-config /path/to/config.json)"
+    required: false
+    default: ""
   allowed_tools:
     description: "Comma-separated list of allowed tools for Claude Code to use"
     required: false
